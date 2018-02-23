@@ -1,7 +1,6 @@
-﻿using System;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,37 +9,58 @@ namespace Auth0DemoApi.Controllers
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
-        // GET api/values
+		private static ConcurrentDictionary<int, string> data = new ConcurrentDictionary<int, string>();
+
+		public ValuesController()
+		{
+			if (data.Count() > 0)
+			{
+				return;
+			}
+
+			data.TryAdd(1, "value1");
+			data.TryAdd(2, "value2");
+			data.TryAdd(3, "value3");
+		}
+
         [HttpGet]
-		[Authorize]
-		public IEnumerable<string> Get()
+		[Authorize(Roles = "admin,developer,guest")]
+		public IActionResult Get()
         {
-            return new string[] { "value1", "value2" };
+			return Ok(data.Values);
         }
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public string Get(int id)
+		[Authorize(Roles = "admin,developer,guest")]
+		public string Get(int id)
         {
-            return "value";
+            data.TryGetValue(id, out var value);
+			return value;
         }
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody]string value)
+		[Authorize(Roles = "admin,developer")]
+		public void Post([FromBody] string value)
         {
+			data.TryAdd(data.Count + 1, value);
         }
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+		[Authorize(Roles = "admin,developer")]
+		public void Put(Payload payload)
         {
+			data.AddOrUpdate(payload.id, payload.Value, (k, v) => payload.Value);
         }
 
         // DELETE api/values/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+		[Authorize(Roles = "admin")]
+		public void Delete(int id)
         {
+			data.Remove(id, out var value);
         }
     }
 }

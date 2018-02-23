@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Auth0DemoApi
 {
@@ -23,11 +24,14 @@ namespace Auth0DemoApi
 			{
 				options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 				options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
 			}).AddJwtBearer(options =>
 			{
 				options.Authority = domain;
 				options.Audience = Configuration["Auth0:ApiIdentifier"];
+				options.TokenValidationParameters = new TokenValidationParameters
+				{
+					RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/roles"
+				};
 			});
 
 			services.AddMvc();

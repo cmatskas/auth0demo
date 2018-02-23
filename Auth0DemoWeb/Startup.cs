@@ -40,9 +40,11 @@ namespace Auth0DemoWeb
 				options.ClientSecret = Configuration["Auth0:ClientSecret"];
 
 				options.ResponseType = "code";
+
 				options.Scope.Clear();
 				options.Scope.Add("openid");
 				options.Scope.Add("profile");
+
 				options.SaveTokens = true;
 				options.CallbackPath = new PathString("/signin-auth0");
 				options.ClaimsIssuer = "Auth0";
@@ -55,6 +57,11 @@ namespace Auth0DemoWeb
 
 				options.Events = new OpenIdConnectEvents
 				{
+					OnRedirectToIdentityProvider = context =>
+					{
+						context.ProtocolMessage.SetParameter("audience", @"http://auth0demoApi");
+						return Task.FromResult(0);
+					},
 					// handle the logout redirection 
 					OnRedirectToIdentityProviderForSignOut = (context) =>
 				    {
@@ -75,12 +82,7 @@ namespace Auth0DemoWeb
 					   context.HandleResponse();
 
 					   return Task.CompletedTask;
-				    },
-					OnRedirectToIdentityProvider = context =>
-					{
-						context.ProtocolMessage.SetParameter("audience", "http://auth0demoApi");
-						return Task.FromResult(0);
-					}
+				    }
 				};
 			});
 
