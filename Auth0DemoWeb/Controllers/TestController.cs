@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Auth0DemoWeb.Controllers
 {
@@ -43,14 +44,13 @@ namespace Auth0DemoWeb.Controllers
 		public async Task<IActionResult> Create()
 		{
 			await SetupAuthorizationHeader();
+			
 			var response = await Client.PostAsync(
 				"http://localhost:13826/api/values", 
-				new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(
-					new Payload
-					{
-						id = DateTime.Now.Millisecond,
-						Value = $"value-{DateTime.Now.Ticks}"
-					}), Encoding.UTF32, "application/json"));
+				 new StringContent(JsonConvert.SerializeObject(GetSamplePayload()), 
+				 Encoding.UTF8, 
+				 "application/json")
+			);
 
 			response.EnsureSuccessStatusCode();
 
@@ -60,14 +60,11 @@ namespace Auth0DemoWeb.Controllers
 		public async Task<IActionResult> Update()
 		{
 			await SetupAuthorizationHeader();
-			var response = await Client.PostAsync(
+			var response = await Client.PutAsync(
 				"http://localhost:13826/api/values",
-				new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(
-					new Payload
-					{
-						id = DateTime.Now.Millisecond,
-						Value = $"value-{DateTime.Now.Ticks}"
-					}), Encoding.UTF32, "application/json"));
+				new StringContent(JsonConvert.SerializeObject(GetSamplePayload()), 
+				Encoding.UTF8, 
+				"application/json"));
 
 			response.EnsureSuccessStatusCode();
 
@@ -78,7 +75,6 @@ namespace Auth0DemoWeb.Controllers
 		{
 			await SetupAuthorizationHeader();
 			var response = await Client.DeleteAsync("http://localhost:13826/api/values/1");
-
 			response.EnsureSuccessStatusCode();
 
 			return View(nameof(Index));
@@ -95,6 +91,15 @@ namespace Auth0DemoWeb.Controllers
 			{
 				Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 			}
+		}
+
+		private Payload GetSamplePayload()
+		{
+			return new Payload
+			{
+				id = DateTime.Now.Millisecond,
+				Value = $"value-{DateTime.Now.Ticks}"
+			};
 		}
     }
 }

@@ -13,6 +13,7 @@ namespace Auth0DemoApi.Controllers
 
 		public ValuesController()
 		{
+			var user = User;
 			if (data.Count() > 0)
 			{
 				return;
@@ -42,15 +43,15 @@ namespace Auth0DemoApi.Controllers
         // POST api/values
         [HttpPost]
 		[Authorize(Roles = "admin,developer")]
-		public void Post([FromBody] string value)
+		public void Post([FromBody] Payload payload)
         {
-			data.TryAdd(data.Count + 1, value);
+			data.TryAdd(payload.id, payload.Value);
         }
 
         // PUT api/values/5
-        [HttpPut("{id}")]
+        [HttpPut]
 		[Authorize(Roles = "admin,developer")]
-		public void Put(Payload payload)
+		public void Put([FromBody] Payload payload)
         {
 			data.AddOrUpdate(payload.id, payload.Value, (k, v) => payload.Value);
         }
