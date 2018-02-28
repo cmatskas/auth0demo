@@ -233,5 +233,80 @@ We can now run and test the application. If everything's been configured correct
 The final piece of the puzzle requires that we configure the authentication and authorization middleware in our API. Open the `Startup.cs` file in the API project and add the following code:
 
 ```
+public void ConfigureServices(IServiceCollection services)
+{
+    string domain = $"https://{Configuration["Auth0:Domain"]}/";
+    services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    }).AddJwtBearer(options =>
+    {
+        options.Authority = domain;
+        options.Audience = Configuration["Auth0:ApiIdentifier"];
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/roles"
+        };
+    });
+
+    services.AddMvc();
+}
+
+// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+{
+    if (env.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+
+    app.UseAuthentication();
+
+    app.UseMvc();
+}
+```
+The code above adds the necessary authentication middleware that validates the `access_token` and retrieves the token claims and roles.
+This allows us to apply the `[Authorize]` attributes to controllers and controller actions and use role-based authorization like in the example below:
 
 ```
+[HttpGet]
+[Authorize(Roles = "admin,developer,guest")]
+public IActionResult Get()
+{
+    // execute some code
+}
+
+[HttpGet("{id}")]
+[Authorize(Roles = "admin,developer,guest")]
+public string Get(int id)
+{
+    // execute some code
+}
+
+// POST api/values
+[HttpPost]
+[Authorize(Roles = "admin,developer")]
+public void Post([FromBody] Payload payload)
+{
+    // execute some code
+}
+
+// PUT api/values/5
+[HttpPut]
+[Authorize(Roles = "admin,developer")]
+public void Put([FromBody] Payload payload)
+{
+    // execute some code
+}
+
+// DELETE api/values/5
+[HttpDelete("{id}")]
+[Authorize(Roles = "admin")]
+public void Delete(int id)
+{
+    // execute some code
+}
+```
+
+In this example, users with **guest** access can only execute `GET` actions. Those with **developer** role can execute `GET, POST, PUT` actions and **admin** roles can execute all of the above, plus `DELETE`. 
