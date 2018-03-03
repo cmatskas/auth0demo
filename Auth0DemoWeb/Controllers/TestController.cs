@@ -14,6 +14,7 @@ namespace Auth0DemoWeb.Controllers
 	public class TestController : Controller
     {
 		private static string accessToken;
+		private static string refreshToken;
 		private static HttpClient Client = new HttpClient();
 
         public IActionResult Index()
@@ -82,6 +83,12 @@ namespace Auth0DemoWeb.Controllers
 
 		private async Task SetupAuthorizationHeader()
 		{
+			//used only to prove that we can acquire the rerfesh token
+			if(string.IsNullOrEmpty(refreshToken))
+			{
+				refreshToken = await HttpContext.GetTokenAsync("refresh_token");
+			}
+
 			if(string.IsNullOrEmpty(accessToken))
 			{
 				accessToken = await HttpContext.GetTokenAsync("access_token");

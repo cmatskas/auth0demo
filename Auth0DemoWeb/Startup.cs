@@ -44,6 +44,7 @@ namespace Auth0DemoWeb
 				options.Scope.Clear();
 				options.Scope.Add("openid");
 				options.Scope.Add("profile");
+				options.Scope.Add("offline_access");
 
 				options.SaveTokens = true;
 				options.CallbackPath = new PathString("/signin-auth0");
