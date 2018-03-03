@@ -1,6 +1,6 @@
 # Introcuction
 
-I'm a big proponent of delegated authentication. It's no surprise that [Broken Authentication](https://www.owasp.org/index.php/Top_10-2017_A2-Broken_Authentication" target="_blank) is #2 at the OWASP top 10 latest report. It's been #2 for a very long time, which means that developers and enterprises are still getting this wrong. There are so many ways that authentication that can go wrong, that delegated authentication should be the preferred and possibly the default choice for all platforms. There are many different services that can provide this. I've heavily worked with Azure AD and Azure AD B2C but this time I wanted to take [Auth0](https://auth0.com/" target="_blank) for a spin. In this post I'll show you how to implement authentication and authorization with Auth0 to secure an ASP.NET Core web application and then extend the authentication mechanism to secure access to a back-end web api. 
+I'm a big proponent of delegated authentication. It's no surprise that [Broken Authentication](https://www.owasp.org/index.php/Top_10-2017_A2-Broken_Authentication) is #2 at the OWASP top 10 latest report. It's been #2 for a very long time, which means that developers and enterprises are still getting this wrong. There are so many ways that authentication that can go wrong, that delegated authentication should be the preferred and possibly the default choice for all platforms. There are many different services that can provide this. I've heavily worked with Azure AD and Azure AD B2C but this time I wanted to take [Auth0](https://auth0.com/) for a spin. In this post I'll show you how to implement authentication and authorization with Auth0 to secure an ASP.NET Core web application and then extend the authentication mechanism to secure access to a back-end web api. 
 
 Auth0 is an Identity Provider service (among many other things) which allows you to decouple the authentication and authorisastion process from your application. Like Azure AD (B2C) and IdentityServer, the idea behind the delegated authentication is that you, as a developer and, in extension, as a company, don't have to worry about how to implement this functionality **properly**. By properly I mean in a secure and scalable manner that meets demand as your application grows. Auth0 takes care of these hard requirements while we can focus on the rest of the application.
 
@@ -44,7 +44,7 @@ At this point I assume you have both a .NET Core Web App and a .NET Core Web API
 } 
 ```
 
-> WARNING: You should avoid storing sensitive information like ClientSecret, API Keys etc in your `appsettings.json` because they are stored in **clear text**. You should use a service like [Azure KeyVault](https://cmatskas.com/securing-asp-net-core-application-settings-using-azure-key-vault/" target="_blank) to store and retrieve this data as needed. More info on using KeyVault can be found [here](https://docs.microsoft.com/en-us/azure/key-vault/key-vault-whatis" target="_blank). 
+> WARNING: You should avoid storing sensitive information like ClientSecret, API Keys etc in your `appsettings.json` because they are stored in **clear text**. You should use a service like [Azure KeyVault](https://cmatskas.com/securing-asp-net-core-application-settings-using-azure-key-vault/) to store and retrieve this data as needed. More info on using KeyVault can be found [here](https://docs.microsoft.com/en-us/azure/key-vault/key-vault-whatis). 
 
 ## 4. Add the Authentiction middleware
 
@@ -238,14 +238,14 @@ function (user, context, callback) {
 }
 ``` 
 
-You'll notice that custom claims need to namespaced (using any url). This is mentioned in the Auth0 [documentation](https://auth0.com/docs/api-auth/tutorials/adoption/scope-custom-claims#custom-claims" target="_blank) and I've attached the excerpt below:
+You'll notice that custom claims need to namespaced (using any url). This is mentioned in the Auth0 [documentation](https://auth0.com/docs/api-auth/tutorials/adoption/scope-custom-claims#custom-claims) and I've attached the excerpt below:
 
 > We can, however, define a non-standard claim by namespacing it through a rule: {example omitted}. 
 Any non-Auth0 HTTP or HTTPS URL can be used as a namespace identifier, and any number of namespaces can be used. The namespace URL does not have to point to an actual resource, it’s only used as an identifier and will not be called by Auth0.
 
-I've explicitly used the `http://schemas.microsoft.com/ws/2008/06/identity/claims/roles` namespace because this is what the [ASP.NET Core Identity](https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.identity?view=aspnetcore-2.0" target="_blank) object maps to by default. I'm also assigning the role to both the `id_token` and `access_token` because the `id_token` is used by the MVC application and the `access_token` is sent to the API. Without these claims in the `access_token`, it wouldn't be possible to propagate the urer role(s) to the API.
+I've explicitly used the `http://schemas.microsoft.com/ws/2008/06/identity/claims/roles` namespace because this is what the [ASP.NET Core Identity](https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.identity?view=aspnetcore-2.0) object maps to by default. I'm also assigning the role to both the `id_token` and `access_token` because the `id_token` is used by the MVC application and the `access_token` is sent to the API. Without these claims in the `access_token`, it wouldn't be possible to propagate the urer role(s) to the API.
 
-To enforce authentication on any controller or controller action, we can apply the `[Authorize]` attribute. If you want to understand how Authorization works in ASP.NET Core, you can find the details in the [official documentation](https://docs.microsoft.com/en-us/aspnet/core/mvc/controllers/filters#authorization-filters" target="_blank). 
+To enforce authentication on any controller or controller action, we can apply the `[Authorize]` attribute. If you want to understand how Authorization works in ASP.NET Core, you can find the details in the [official documentation](https://docs.microsoft.com/en-us/aspnet/core/mvc/controllers/filters#authorization-filters). 
 
 We can now run and test the application! If everything's been configured correctly then clicking on the login page, should redirect you to Auth0's login page which looks like this:
 
@@ -378,5 +378,5 @@ Once logged in successfully, we access the Refresh Token using the following cod
 
 `var refreshToken = await HttpContext.GetTokenAsync("refresh_token");`
 
-There's also a very good example that shows how to use Auth0 and Refresh Tokens in a Xamarin mobile application [here](https://github.com/auth0-community/auth0-xamarin-oidc-samples/blob/master/Quickstart/01-Login/iOS/iOSSample/MyViewController.cs" target="_blank)
+There's also a very good example that shows how to use Auth0 and Refresh Tokens in a Xamarin mobile application [here](https://github.com/auth0-community/auth0-xamarin-oidc-samples/blob/master/Quickstart/01-Login/iOS/iOSSample/MyViewController.cs).
 
