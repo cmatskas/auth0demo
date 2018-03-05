@@ -377,5 +377,5 @@ Once logged in successfully, we access the Refresh Token using the following cod
 
 There's also a very good example that shows how to use Auth0 and Refresh Tokens in a Xamarin mobile application [here](https://github.com/auth0-community/auth0-xamarin-oidc-samples/blob/master/Quickstart/01-Login/iOS/iOSSample/MyViewController.cs).
 
-## SUmmary
-Authentication is a complex process and the last thing any developer wants is to compromise the security of a system due to bad a authentication and authorisation implementation. Auth0 makes the whole process a lot easier.
+## Summary
+Authentication is a complex process and the last thing any developer wants is to compromise the security of a system by implementing authentication and authorization badly. Auth0 makes the whole process a lot easier.
