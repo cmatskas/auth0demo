@@ -1,10 +1,10 @@
-# Introcuction
+# Introduction
 
-I'm a big proponent of delegated authentication. It's no surprise that [Broken Authentication](https://www.owasp.org/index.php/Top_10-2017_A2-Broken_Authentication) is #2 at the OWASP top 10 latest report. It's been #2 for a very long time, which means that developers and enterprises are still getting this wrong. There are so many ways that authentication that can go wrong, that delegated authentication should be the preferred and possibly the default choice for all platforms. There are many different services that can provide this. I've heavily worked with Azure AD and Azure AD B2C but this time I wanted to take [Auth0](https://auth0.com/) for a spin. In this post I'll show you how to implement authentication and authorization with Auth0 to secure an ASP.NET Core web application and then extend the authentication mechanism to secure access to a back-end web api. 
+I'm a big proponent of delegated authentication. It's no surprise that [Broken Authentication](https://www.owasp.org/index.php/Top_10-2017_A2-Broken_Authentication) is #2 on the latest OWASP Top 10 report. It's been #2 for a very long time, which means that developers and enterprises are still getting this wrong. There are so many ways that authentication can go wrong, that delegated authentication should be the preferred and possibly the default choice for all platforms. There are many different services that can provide this. I've worked with Azure AD and Azure AD B2C a lot, but this time I wanted to take [Auth0](https://auth0.com/) for a spin. In this post I'll show you how to implement authentication and authorization with Auth0 to secure an ASP.NET Core web application and then extend the authentication mechanism to secure access to a back-end web api. 
 
-Auth0 is an Identity Provider service (among many other things) which allows you to decouple the authentication and authorisastion process from your application. Like Azure AD (B2C) and IdentityServer, the idea behind the delegated authentication is that you, as a developer and, in extension, as a company, don't have to worry about how to implement this functionality **properly**. By properly I mean in a secure and scalable manner that meets demand as your application grows. Auth0 takes care of these hard requirements while we can focus on the rest of the application.
+Auth0 is an Identity Provider service (amongst many other things) which allows you to decouple the authentication and authorization processes from your application. Like Azure AD (B2C) and IdentityServer, the idea behind the delegated authentication is that you don't have to worry about how to implement this functionality **properly** (both as a developer and, by extension, as a company). By properly I mean in a secure and scalable manner that meets demand as your application grows. Auth0 takes care of these hard requirements allowing you to focus on the rest of the application.
 
-The implementation below makes use of Role-based authorisation using custom Roles to secure access to various parts of the application.
+The implementation below makes use of Role-based authorization using custom Roles to secure access to various parts of the application.
 
 ## 1. Getting a copy of the project
 
@@ -18,9 +18,9 @@ To grab a copy of the sample code, you can download the zip or clone it locally:
 
 - An Auth0 account
 - .NET Core SDK
-- Visual Studio 2017 15.3 or Visual Studio Code
+- Visual Studio 2017 (Update 15.3 or later) or Visual Studio Code
 
-To allow our ASP.NET Core application to integrate with Auth0, we need an Auth0 application. The instructions on how to set this up can be found [here](https://auth0.com/docs/quickstart/webapp/aspnet-core/v2/00-intro). However, I've added a quick guide here as well to save you some time.
+To allow our ASP.NET Core application to integrate with Auth0, we need to create an Auth0 application. The instructions on how to set this up can be found [here](https://auth0.com/docs/quickstart/webapp/aspnet-core/v2/00-intro). However, I've added a quick guide here as well to save you some time.
 
 On your Auth0 **Dashboard**, click on **Clients** and then click on the *Big Red Button* to **+Create New Client**. On the modal window, choose a meaningful name for your app and then, since we're working with ASP.NET Core, choose **Regular Web Application** as per the image below:
 
@@ -30,7 +30,7 @@ Once the application is created, skip the quick start and go to the **Settings T
 
 ![Client Settings](Images/auth0_with_netCore_2.png)
 
-You can follow the Auth0 walkthrough that explains what you need to do to [setup your application](https://auth0.com/docs/quickstart/webapp/aspnet-core#get-your-application-keys) (in Auth0 terminology: Application == Client) and how to [get your Auth0 client keys](https://auth0.com/docs/quickstart/webapp/aspnet-core#get-your-application-keys). Finally, since this application will need to access an API, we also need to [configure the JWT token](https://auth0.com/docs/quickstart/webapp/aspnet-core#configure-json-web-token-signature-algorithm) (i.e. the access token for authenticating in the API) 
+You can follow the Auth0 walkthrough that explains what you need to do to [setup your application](https://auth0.com/docs/quickstart/webapp/aspnet-core#get-your-application-keys) (in Auth0 terminology: Application == Client) and how to [get your Auth0 client keys](https://auth0.com/docs/quickstart/webapp/aspnet-core#get-your-application-keys). Finally, since this application will need to access an API, we also need to [configure the JWT token](https://auth0.com/docs/quickstart/webapp/aspnet-core#configure-json-web-token-signature-algorithm) (i.e. the access token for authenticating in the API). 
 
 ## 3. Edit the project with your settings
 At this point I assume you have both a .NET Core Web App and a .NET Core Web API or that you've cloned the project from Step #1. With the Auth0 settings in place, we can now edit our web application's `appsettings.json` to add the Auth0 configuration settings. Open the file and populate the values below:
@@ -46,7 +46,7 @@ At this point I assume you have both a .NET Core Web App and a .NET Core Web API
 
 > WARNING: You should avoid storing sensitive information like ClientSecret, API Keys etc in your `appsettings.json` because they are stored in **clear text**. You should use a service like [Azure KeyVault](https://cmatskas.com/securing-asp-net-core-application-settings-using-azure-key-vault/) to store and retrieve this data as needed. More info on using KeyVault can be found [here](https://docs.microsoft.com/en-us/azure/key-vault/key-vault-whatis). 
 
-## 4. Add the Authentiction middleware
+## 4. Add the authentication middleware
 
 The setup for Auth0 is fairly straightforward. Comparing this to the Azure AD integration process, I found that Auth0 is much easier to work with. The code that adds the authentication middleware is provided below. The code needs to be added to the `Startup.cs` class:
 
@@ -184,15 +184,15 @@ Finally, I wanted to provide a way for authenticated users to see their username
 ```
 When a user logs in, his/her name is displayed on the navigation bar with an option to **logout**. Unauthenticated users can only see the **login** option.  
 
-## 6. Adding users and custom Roles
-I mentioned a few times already that the purpose of this post is to show how to configure the authentication parameters and then enforce role-based authorization. At the moment, this is not configured anywhere. To implement and role-based authorization, we need to do 2 things:
+## 6. Adding users and custom roles
+I mentioned a few times already that the purpose of this post is to show how to configure the authentication parameters and then to enforce role-based authorization. At the moment, this is not configured anywhere. To implement role-based authorization, we need to do two things:
 
 1. Add custom roles to our Auth0 users
 2. Consume and validate the user roles in the WebApp and WebAPI
 
-For this post we're assuming that all the users are created and managed inside the Auth0 platform. There is a plethora of options when it comes to storing user information such as social media accounts or custom user databases. However, in this instance we'll keep things simple and use the built-in user management service. 
+For this post we're assuming that all the users are created and managed inside the Auth0 platform. There is a plethora of options when it comes to storing user information, such as social media accounts or custom user databases. However, in this instance we'll keep things simple and use the built-in user management service. 
 
-On the Auth0 portal, on the **Dashboard** page, select **Users** from the left-hand side navigation bar. Press the **+ Create New User** button and add a user using whatever username (email) and password you want. 
+On the Auth0 portal, on the **Dashboard** page, select **Users** from the left-hand side navigation bar. Press the **+ Create New User** button to add a user, specifying whatever username (email) and password you want. 
 
 ![Add New Account](Images/auth0_with_netCore_7.png)
 
@@ -220,7 +220,7 @@ Don't forget to save the new rule.
 
 ![Save the Rule](Images/auth0_with_netCore_9.png)
 
-You can test the rule to see whether everything's working as expected. You can also use inline `console.log()` statements to output extra information to the test functionality, or you can stream the logs to a separate page that listens for debug/console statements. The full code of the rule is provided below: 
+You can test the rule to see whether everything's working as expected. You can also use inline `console.log()` statements to output extra information to test the functionality, or you can stream the logs to a separate page that listens for debug/console statements. The full code of the rule is provided below: 
 
 ```
 function (user, context, callback) {
@@ -238,12 +238,12 @@ function (user, context, callback) {
 }
 ``` 
 
-You'll notice that custom claims need to namespaced (using any url). This is mentioned in the Auth0 [documentation](https://auth0.com/docs/api-auth/tutorials/adoption/scope-custom-claims#custom-claims) and I've attached the excerpt below:
+You'll notice that custom claims need to be namespaced (using any url). This is mentioned in the Auth0 [documentation](https://auth0.com/docs/api-auth/tutorials/adoption/scope-custom-claims#custom-claims) as shown in this excerpt:
 
 > We can, however, define a non-standard claim by namespacing it through a rule: {example omitted}. 
 Any non-Auth0 HTTP or HTTPS URL can be used as a namespace identifier, and any number of namespaces can be used. The namespace URL does not have to point to an actual resource, it’s only used as an identifier and will not be called by Auth0.
 
-I've explicitly used the `http://schemas.microsoft.com/ws/2008/06/identity/claims/roles` namespace because this is what the [ASP.NET Core Identity](https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.identity?view=aspnetcore-2.0) object maps to by default. I'm also assigning the role to both the `id_token` and `access_token` because the `id_token` is used by the MVC application and the `access_token` is sent to the API. Without these claims in the `access_token`, it wouldn't be possible to propagate the urer role(s) to the API.
+I've explicitly used the `http://schemas.microsoft.com/ws/2008/06/identity/claims/roles` namespace because this is what the [ASP.NET Core Identity](https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.identity?view=aspnetcore-2.0) object maps to by default. I'm also assigning the role both to the `id_token` and to the `access_token` because the `id_token` is used by the MVC application whereas the `access_token` is sent to the API. Without these claims in the `access_token`, it wouldn't be possible to propagate the user role(s) to the API.
 
 To enforce authentication on any controller or controller action, we can apply the `[Authorize]` attribute. If you want to understand how Authorization works in ASP.NET Core, you can find the details in the [official documentation](https://docs.microsoft.com/en-us/aspnet/core/mvc/controllers/filters#authorization-filters). 
 
@@ -251,7 +251,7 @@ We can now run and test the application! If everything's been configured correct
 
 ![Create User Account](Images/auth0_with_netCore_6.png) 
 
-## Add Authentication and Authorization to the API
+## Add authentication and authorization to the API
 The final piece of the puzzle requires that we configure the authentication and authorization middleware in our API. Open the `Startup.cs` file in the API project and add the following code:
 
 ```
@@ -315,7 +315,6 @@ public string Get(int id)
     // execute some code
 }
 
-// POST api/values
 [HttpPost]
 [Authorize(Roles = "admin,developer")]
 public void Post([FromBody] Payload payload)
@@ -323,7 +322,6 @@ public void Post([FromBody] Payload payload)
     // execute some code
 }
 
-// PUT api/values/5
 [HttpPut]
 [Authorize(Roles = "admin,developer")]
 public void Put([FromBody] Payload payload)
@@ -331,7 +329,6 @@ public void Put([FromBody] Payload payload)
     // execute some code
 }
 
-// DELETE api/values/5
 [HttpDelete("{id}")]
 [Authorize(Roles = "admin")]
 public void Delete(int id)
@@ -342,26 +339,26 @@ public void Delete(int id)
 
 In this example, users with the **guest** role can only execute `GET` actions. Those with the **developer** role can execute `GET, POST, PUT` actions and those with an **admin** role can execute all of the above, plus `DELETE`. 
 
-## Adding Refresh Tokens for mobile applications
+## Adding refresh tokens for mobile applications
 
-The web application uses the `id_token` to access the user's profile while the `access_token` is used to make authenticated calls to the WebAPI. A **Refresh Token** allows an application to request a new access_token or id_token directly from Auth0, without having to re-authenticate the user. This will work as long as the Refresh Token has not been revoked or expired. Refresh tokens can also expire but they're rather long-lived.
+The web application uses the `id_token` to access the user's profile while the `access_token` is used to make authenticated calls to the WebAPI. A **Refresh Token** allows an application to request a new `access_token` or `id_token` directly from Auth0, without having to re-authenticate the user. This will work as long as the Refresh Token has not expired or been revoked. Refresh tokens can also expire but they're rather long-lived.
 
 To configure the `refresh_token`, in the Auth0 dashboard, select **APIs** from the left-hand navigation bar and then the **Settings** tab. 
 
 ![API Settings](Images/auth0_with_netCore_10.png)
 
-Scroll down to the bottom of the settings and toggle the **Offline Access** to on/true
+Scroll down to the bottom of the settings and toggle the **Offline Access** to `on/true`
 
 ![Enable Offline support](Images/auth0_with_netCore_11.png)
 
-With this setting on, we can request for a Refresh token during the first authentication by including the `offline_access` scope. That's all you need. The Offline Access toggle in your API settings set to true and the extra scope in the authentication request. 
+With this setting on, we can make a request for a Refresh token during the first authentication by including the `offline_access` scope. That's all you need: the Offline Access toggle in your API settings set to true and the extra scope in the authentication request. 
 
 In your application (assuming it's a .NET Core Web Application) you can add the new scope in the authentication middleware:
 
 ```
 public void ConfigureServices(IServiceCollection services)
 {
-    //other code omitted for clarity		
+    // previous code omitted for clarity		
     options.Scope.Clear();
     options.Scope.Add("openid");
     options.Scope.Add("profile");
@@ -380,3 +377,5 @@ Once logged in successfully, we access the Refresh Token using the following cod
 
 There's also a very good example that shows how to use Auth0 and Refresh Tokens in a Xamarin mobile application [here](https://github.com/auth0-community/auth0-xamarin-oidc-samples/blob/master/Quickstart/01-Login/iOS/iOSSample/MyViewController.cs).
 
+## SUmmary
+Authentication is a complex process and the last thing any developer wants is to compromise the security of a system due to bad a authentication and authorisation implementation. Auth0 makes the whole process a lot easier.
